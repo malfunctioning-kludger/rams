@@ -78,7 +78,7 @@ Unexpose = (element, callback) ->
       copy.style.zIndex = '1'
       copy.style.opacity = 0
       copy.style.clip = 'rect(' + 0 + 'px,' + copy.offsetWidth + 'px,' + copy.offsetHeight + 'px,' + 0 + 'px)'
-    else
+    else if copy
       copy.style.transform = 'scale(0.5)'
       copy.style.zIndex = ''
       copy.style.opacity = 0
@@ -87,7 +87,7 @@ Unexpose = (element, callback) ->
   setTimeout ->
     xposed.style.zIndex = ''
     for copy in copied
-      copy.parentNode?.removeChild(copy)
+      copy?.parentNode?.removeChild(copy)
   , 800
   copies = exposed = null
 
@@ -117,12 +117,11 @@ Expose = (element, callback) ->
     copy.style.height = element.offsetHeight + 'px'
     copy.style.top = element.offsetTop + 'px'
     copy.style.left = element.offsetLeft + 'px'
-    copy.style.transform = 'scale(0.5)'
     copy.style.zIndex = 3 + (8 - order[i])
     copy.style.opacity = 0
     copy.style.transform = 'scale(0.75)'
     copy.style.transition = 'clip 0.3s, opacity 0.4s ' + parseFloat((0.05 * order[i]).toFixed(3)) + 's, transform 0.3s ease-in ' + parseFloat((0.04 * order[i]).toFixed(3)) + 's'
-    copies.push(copy)
+    copies[i] = copy
     console.log(i, order[i])
   
   totalLeft = 0
@@ -133,11 +132,13 @@ Expose = (element, callback) ->
   shift = 'translateX(' + (window.innerWidth / 2 - totalLeft - element.offsetWidth / 2) + 'px) '
   
   for copy in copies
-    element.parentNode.insertBefore(copy, element.nextSibling)
+    if copy
+      element.parentNode.insertBefore(copy, element.nextSibling)
 
   requestAnimationFrame ->
     requestAnimationFrame ->
       for copy, i in copies
+        continue unless copy
         copy.style.opacity = 1
         copy.style.transform = 'scale(0.5)'
         p = 3

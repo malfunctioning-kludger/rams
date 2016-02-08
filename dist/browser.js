@@ -224,7 +224,7 @@ Unexpose = function(element, callback) {
       copy.style.zIndex = '1';
       copy.style.opacity = 0;
       copy.style.clip = 'rect(' + 0 + 'px,' + copy.offsetWidth + 'px,' + copy.offsetHeight + 'px,' + 0 + 'px)';
-    } else {
+    } else if (copy) {
       copy.style.transform = 'scale(0.5)';
       copy.style.zIndex = '';
       copy.style.opacity = 0;
@@ -240,7 +240,7 @@ Unexpose = function(element, callback) {
     results = [];
     for (k = 0, len1 = copied.length; k < len1; k++) {
       copy = copied[k];
-      results.push((ref = copy.parentNode) != null ? ref.removeChild(copy) : void 0);
+      results.push(copy != null ? (ref = copy.parentNode) != null ? ref.removeChild(copy) : void 0 : void 0);
     }
     return results;
   }, 800);
@@ -273,12 +273,11 @@ Expose = function(element, callback) {
     copy.style.height = element.offsetHeight + 'px';
     copy.style.top = element.offsetTop + 'px';
     copy.style.left = element.offsetLeft + 'px';
-    copy.style.transform = 'scale(0.5)';
     copy.style.zIndex = 3 + (8 - order[i]);
     copy.style.opacity = 0;
     copy.style.transform = 'scale(0.75)';
     copy.style.transition = 'clip 0.3s, opacity 0.4s ' + parseFloat((0.05 * order[i]).toFixed(3)) + 's, transform 0.3s ease-in ' + parseFloat((0.04 * order[i]).toFixed(3)) + 's';
-    copies.push(copy);
+    copies[i] = copy;
     console.log(i, order[i]);
   }
   totalLeft = 0;
@@ -291,7 +290,9 @@ Expose = function(element, callback) {
   shift = 'translateX(' + (window.innerWidth / 2 - totalLeft - element.offsetWidth / 2) + 'px) ';
   for (k = 0, len = copies.length; k < len; k++) {
     copy = copies[k];
-    element.parentNode.insertBefore(copy, element.nextSibling);
+    if (copy) {
+      element.parentNode.insertBefore(copy, element.nextSibling);
+    }
   }
   return requestAnimationFrame(function() {
     return requestAnimationFrame(function() {
@@ -299,6 +300,9 @@ Expose = function(element, callback) {
       results = [];
       for (i = l = 0, len1 = copies.length; l < len1; i = ++l) {
         copy = copies[i];
+        if (!copy) {
+          continue;
+        }
         copy.style.opacity = 1;
         copy.style.transform = 'scale(0.5)';
         p = 3;
