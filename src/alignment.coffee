@@ -5,10 +5,7 @@ module.exports = ->
 	#	img.style.clip = img.style.webkitClip = 'rect(' + (- img.offsetLeft) + 'px,' + (- img.offsetLeft + img.offsetWidth) + 'px,' + (- img.offsetLeft) + 'px,' + (element.offsetHeight) + 'px)'
 	
 	for element in document.querySelectorAll('.horizontal')
-		if element.classList.contains('inverted')
-			list = Array.prototype.reverse.call(Array.prototype.slice.call(element.children))
-		else
-			list = element.children
+		list = getChildren(element)
 		for child, index in list
 			continue unless previous = list[index - 1]
 			if child.offsetTop >= previous.offsetTop + previous.offsetHeight
@@ -18,7 +15,6 @@ module.exports = ->
 		module.exports.eachRow layout, (collection) ->
 			pictures = collection.map (item) -> item.getElementsByTagName('picture')[0]
 
-			console.log('ROW', collection)
 			for article, index in collection
 				picture = pictures[index]
 
@@ -33,7 +29,6 @@ module.exports = ->
 					article.classList.remove('full')
 
 			basis = parseFloat(picture.style.maxWidth)
-			console.log(basis, 44)
 			#if element.classList.contains('vertical') || element.classList.contains('actually-vertical')
 			#	if basis / window.innerWidth > 0.9
 			#		element.style.flexBasis = element.style.webkitFlexBasis = '100%'
@@ -47,7 +42,7 @@ module.exports = ->
 			#		element.style.flexBasis = element.style.webkitFlexBasis = '25%'
 
 	for element in document.querySelectorAll('.x-aligned')
-		unless element.offsetWidth == layout.offsetWidth
+		if element.classList.contains('actually-vertical') || element.classList.contains('vertical')
 			continue
 
 		module.exports.eachRow element, (collection) ->
@@ -61,20 +56,23 @@ module.exports = ->
 					offset = collection[0].offsetWidth + collection[0].offsetLeft - element.offsetWidth / 2
 					
 					if span >= offset
-						element.style.paddingRight = Math.min(span, Math.abs(offset)) + 'px'
+						if offset > 0
+							element.style.paddingRight = Math.min(span, Math.abs(offset)) + 'px'
+						else
+							element.style.paddingLeft = Math.min(span, Math.abs(offset)) + 'px'
 				else
-					offset = element.offsetWidth / 2 - collection[1].offsetWidth
+					offset = element.offsetWidth / 2 - collection[0].offsetWidth
 					if span >= Math.abs(offset)
-						element.style.paddingLeft = Math.abs(offset) + 'px'
+						if offset > 0
+							element.style.paddingLeft = Math.abs(offset) + 'px'
+						else
+							element.style.paddingRight = Math.abs(offset) + 'px'
 
 	return
 
 module.exports.eachRow = (element, callback) ->
 	collection = null
-	if element.classList.contains('inverted')
-		list = Array.prototype.reverse.call(Array.prototype.slice.call(element.children))
-	else
-		list = element.children
+	list = getChildren(element)
 	i = 0
 	for child, index in list
 		continue unless previous = list[index - 1]
@@ -103,6 +101,14 @@ module.exports.reset = ->
 
 	module.exports()
 	#module.exports()
+
+getChildren = (element) ->
+  if element.classList.contains('inverted')
+    list = Array.prototype.reverse.call(Array.prototype.slice.call(element.children))
+  else
+    list = Array.prototype.slice.call(element.children)
+
+  return list.filter (el) -> el.tagName != 'STYLE'
 
 window.addEventListener('resize', module.exports.reset)
 window.addEventListener('load', module.exports)

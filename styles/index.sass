@@ -12,6 +12,29 @@ body, html
 article
 	position: relative
 
+	transition: transform 0.3s, color 0.3s, background-color 0.3s;
+
+* 
+	transition: color 0.3s ease-in, background-color 0.5s ease-out
+
+body:before
+	pointer-events: none
+
+	position: fixed
+	z-index: 1
+	content: ""
+	top: 0
+	bottom: 0
+	left: 0
+	right: 0
+	transition: opacity 0.5s
+	background: rgba(0,0,0,0.8)
+	opacity: 0
+
+body.exposing:before
+	opacity: 1
+	
+
 h1, h2, h3, p, ul, li, .block
 	padding: 0
 	margin: 0

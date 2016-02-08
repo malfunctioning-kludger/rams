@@ -13,7 +13,7 @@ global.Pallete = module.exports = (img) ->
     for row, i in Space
       for cell, j in row
         if j < 7
-          if name == cell
+          if name == cell || (i == I && j == J)
             return Schemes[cell](swatches, matrix, (I ? i) / 6, (J ? j) / 6)
     return
   generator.debug = ->
