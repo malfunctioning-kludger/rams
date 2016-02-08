@@ -1,0 +1,85 @@
+.horizontal
+  display: flex
+  flex-direction: row
+  flex-wrap: wrap
+  box-sizing: border-box
+  align-content: flex-end
+
+  &.inverted
+    flex-direction: row-reverse
+    flex-wrap: wrap-reverse
+  //justify-content: center
+
+  > .textual
+    flex: 0.5 0 50%;
+    box-sizing: border-box
+    //max-width: 33%
+
+  > article
+    flex: 1 0 100%
+    box-sizing: border-box
+
+  > .graphical
+    flex: 1 0 50%
+    box-sizing: border-box
+    align-self: center
+    &.portrait
+      flex: 0 0 50%
+
+    &.landscape
+
+article.actually-vertical, article.vertical
+  &.full, &.partial-image
+    padding: 2rem 0
+
+  > .textual
+    flex: 0 0.75 auto;
+    max-width: 30rem
+
+  > .graphical
+    flex-grow: 0
+    flex-basis: auto !important
+
+article.actually-vertical
+  > .graphical
+    flex-basis: 100% !important
+
+.vertical
+  > article
+    flex: 1 0.75 100%;
+
+
+@media (min-width: 1100px)
+  .horizontal
+    > article
+      flex: 1 1 50%;
+
+@media (min-width: 1400px)
+  .horizontal
+    > article
+      flex: 1 0 600px;
+
+@media (min-width: 720px)
+  .horizontal
+    flex: 1 1 100%;
+
+  .forced.horizontal
+    flex-wrap: nowrap
+
+  .forced.vertical
+    flex-direction: column
+
+article.actually-vertical, article.vertical
+  align-items: center
+  justify-content: center
+
+
+.vertical
+  display: flex
+  flex-wrap: wrap
+  flex-direction: column
+  justify-content: center
+
+
+  &.inverted
+    flex-direction: column-reverse

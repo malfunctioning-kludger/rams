@@ -1,0 +1,19 @@
+.panel {
+  -webkit-align-self: center;
+      -ms-flex-item-align: center;
+          align-self: center; }
+
+.box {
+  -webkit-align-self: center;
+      -ms-flex-item-align: center;
+          align-self: center;
+  box-sizing: border-box;
+  padding: 2rem; }
+  .box.bottom {
+    -webkit-align-self: bottom;
+        -ms-flex-item-align: bottom;
+            align-self: bottom; }
+  .box.top {
+    -webkit-align-self: top;
+        -ms-flex-item-align: top;
+            align-self: top; }

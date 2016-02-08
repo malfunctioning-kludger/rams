@@ -1,0 +1,23 @@
+{
+  "name": "rams",
+  "description": "End-to-end website designer",
+  "version": "0.0.1",
+  "dependencies": {
+    "coffeeify": "*",
+    "vibrant": "git@github.com:jariz/vibrant.js.git"
+  },
+  "devDependencies": {},
+  "browserify": {
+    "transform": [
+      "coffeeify"
+    ]
+  },
+  "keywords": [],
+  "scripts": {
+    "build": "browserify src/index.coffee > dist/index.js",
+    "watch": "watchify src/pallete.coffee -o dist/pallete.js -v",
+    "build2": "browserify src/pallete.coffee > dist/pallete.js",
+    "test": "grunt test",
+    "prepublish": "grunt build-fast"
+  }
+}

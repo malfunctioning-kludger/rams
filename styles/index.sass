@@ -1,0 +1,33 @@
+@import "outline";
+@import "direction";
+@import "padding";
+@import "group";
+@import "boxing";
+@import "decorations";
+
+body, html
+	padding: 0
+	margin: 0
+
+article
+	position: relative
+
+h1, h2, h3, p, ul, li, .block
+	padding: 0
+	margin: 0
+
+	+ h1, + h2, + h3, + p, + ul, + li, + .block
+		margin-top: 1rem
+
+*
+	box-sizing: border-box
+
+
+span.accent
+	padding-left: 0.5rem
+	padding-right: 0.5rem
+	padding-top: 0.05rem
+	padding-bottom: 0.1rem
+	margin-top: -0.05rem
+	margin-bottom: -0.1rem
+	display: inline-block

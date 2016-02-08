@@ -1,0 +1,13 @@
+.textual {
+  max-width: 30rem;
+  min-width: 20rem; }
+  .textual > .textual {
+    margin-left: 0;
+    margin-right: 0;
+    min-width: auto; }
+
+.graphical {
+  min-width: 200px; }
+  .graphical img {
+    max-width: 100%;
+    width: 100%; }
