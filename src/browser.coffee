@@ -73,12 +73,13 @@ Unexpose = (element, callback) ->
 
   copied = copies.slice()
   for copy in copied
+    continue unless copy
     if copy == element
       copy.style.transform = 'scale(1)'
       copy.style.zIndex = '1'
       copy.style.opacity = 0
       copy.style.clip = 'rect(' + 0 + 'px,' + copy.offsetWidth + 'px,' + copy.offsetHeight + 'px,' + 0 + 'px)'
-    else if copy
+    else
       copy.style.transform = 'scale(0.5)'
       copy.style.zIndex = ''
       copy.style.opacity = 0
