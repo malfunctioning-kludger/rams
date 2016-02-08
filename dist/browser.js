@@ -247,7 +247,7 @@ Unexpose = function(element, callback) {
   return copies = exposed = null;
 };
 
-order = [0, 1, 2, 7, 3, 6, 5, 4];
+order = [2, 1, 0, 2, 1, 0, 2, 1, 0];
 
 Expose = function(element, callback) {
   var copy, i, j, k, len, parent, rect, shift, totalLeft;
@@ -257,12 +257,11 @@ Expose = function(element, callback) {
   document.body.classList.add('exposing');
   exposed = element;
   copies = [];
-  element.style.zIndex = 1;
   if (rect = Expose.getRectangle(element)) {
     console.log(rect, rect.toString());
     element.style.clip = rect.toString();
   }
-  for (i = j = 0; j < 8; i = ++j) {
+  for (i = j = 0; j < 9; i = ++j) {
     copy = element.cloneNode(true);
     copy.setAttribute('id', 'copy' + element.id + '-' + i);
     if ((typeof callback === "function" ? callback(copy, i) : void 0) === false) {
@@ -278,7 +277,7 @@ Expose = function(element, callback) {
     copy.style.zIndex = 3 + (8 - order[i]);
     copy.style.opacity = 0;
     copy.style.transform = 'scale(0.75)';
-    copy.style.transition = 'clip 0.3s, opacity 0.4s ' + parseFloat((0.05 * order[i]).toFixed(3)) + 's, transform 0.3s ease-in ' + parseFloat((0.02 * order[i]).toFixed(3)) + 's';
+    copy.style.transition = 'clip 0.3s, opacity 0.4s ' + parseFloat((0.05 * order[i]).toFixed(3)) + 's, transform 0.3s ease-in ' + parseFloat((0.04 * order[i]).toFixed(3)) + 's';
     copies.push(copy);
     console.log(i, order[i]);
   }
@@ -290,7 +289,6 @@ Expose = function(element, callback) {
     }
   }
   shift = 'translateX(' + (window.innerWidth / 2 - totalLeft - element.offsetWidth / 2) + 'px) ';
-  element.style.transform = shift + 'scale(0.5)';
   for (k = 0, len = copies.length; k < len; k++) {
     copy = copies[k];
     element.parentNode.insertBefore(copy, element.nextSibling);
@@ -318,15 +316,18 @@ Expose = function(element, callback) {
             results.push(copy.style.transform = shift + 'translateX(' + (rect.right + rect.left - p) / 2 + 'px) ' + 'scale(0.5) translateX(-100%)');
             break;
           case 4:
-            results.push(copy.style.transform = shift + 'translateX(' + (-rect.left - rect.right + p) / 2 + 'px) ' + 'scale(0.5) translateX(100%)');
+            results.push(copy.style.transform = shift + 'translateX(0px) ' + 'scale(0.5)');
             break;
           case 5:
-            results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'translateX(' + (rect.right + rect.left - p) / 2 + 'px) scale(0.5) translateX(-100%) translateY(100%)');
+            results.push(copy.style.transform = shift + 'translateX(' + (-rect.left - rect.right + p) / 2 + 'px) ' + 'scale(0.5) translateX(100%)');
             break;
           case 6:
-            results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'scale(0.5) translateY(100%)');
+            results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'translateX(' + (rect.right + rect.left - p) / 2 + 'px) scale(0.5) translateX(-100%) translateY(100%)');
             break;
           case 7:
+            results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'scale(0.5) translateY(100%)');
+            break;
+          case 8:
             results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'translateX(' + (-rect.left - rect.right + p) / 2 + 'px) scale(0.5) translateX(100%) translateY(100%)');
             break;
           default:
@@ -364,7 +365,13 @@ Expose.getRectangle = function(element) {
       }
     }
     offsetTop = list[0].offsetTop;
+    if (list[0].tagName === 'PICTURE') {
+      offsetTop += list[0].offsetHeight - 200;
+    }
     offsetHeight = list[list.length - 1].offsetTop + list[list.length - 1].offsetHeight - offsetTop;
+    if (list[1].tagName === 'PICTURE') {
+      offsetHeight -= list[1].offsetHeight - 200;
+    }
   } else {
     offsetHeight = 0;
     offsetTop = 0;
@@ -391,7 +398,7 @@ Expose.getRectangle = function(element) {
   };
 };
 
-shifts = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+shifts = [[-1, -1], [0, -1], [1, -1], [-1, 0], [0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
 
 document.addEventListener('click', function(e) {
   var parent, results;

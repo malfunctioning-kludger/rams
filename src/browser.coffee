@@ -94,7 +94,7 @@ Unexpose = (element, callback) ->
 
 
 
-order = [0,1,2,7,3,6,5,4]
+order = [2,1,0,2,1,0,2,1,0]
 Expose = (element, callback) ->
   if copies
     Unexpose()
@@ -103,11 +103,10 @@ Expose = (element, callback) ->
   exposed = element
 
   copies = []
-  element.style.zIndex = 1
   if rect = Expose.getRectangle(element)
     console.log(rect, rect.toString())
     element.style.clip = rect.toString()
-  for i in [0...8]
+  for i in [0...9]
     copy = element.cloneNode(true)
     copy.setAttribute('id', 'copy' + element.id + '-' + i)
     if callback?(copy, i) == false
@@ -122,7 +121,7 @@ Expose = (element, callback) ->
     copy.style.zIndex = 3 + (8 - order[i])
     copy.style.opacity = 0
     copy.style.transform = 'scale(0.75)'
-    copy.style.transition = 'clip 0.3s, opacity 0.4s ' + parseFloat((0.05 * order[i]).toFixed(3)) + 's, transform 0.3s ease-in ' + parseFloat((0.02 * order[i]).toFixed(3)) + 's'
+    copy.style.transition = 'clip 0.3s, opacity 0.4s ' + parseFloat((0.05 * order[i]).toFixed(3)) + 's, transform 0.3s ease-in ' + parseFloat((0.04 * order[i]).toFixed(3)) + 's'
     copies.push(copy)
     console.log(i, order[i])
   
@@ -133,7 +132,6 @@ Expose = (element, callback) ->
 
   shift = 'translateX(' + (window.innerWidth / 2 - totalLeft - element.offsetWidth / 2) + 'px) '
   
-  element.style.transform = shift + 'scale(0.5)'
   for copy in copies
     element.parentNode.insertBefore(copy, element.nextSibling)
 
@@ -156,15 +154,18 @@ Expose = (element, callback) ->
             copy.style.transform = shift + 'translateX('+ (rect.right + rect.left - p) / 2 + 'px) ' +
             'scale(0.5) translateX(-100%)'
           when 4
+            copy.style.transform = shift + 'translateX(0px) ' +
+            'scale(0.5)'
+          when 5
             copy.style.transform = shift + 'translateX('+ (- rect.left - rect.right + p) / 2 + 'px) ' +
             'scale(0.5) translateX(100%)'
-          when 5
-            copy.style.transform = shift + 'translateY('+ (-rect.bottom - rect.top + p)/ 2 + 'px) ' +
-            'translateX('+ (rect.right + rect.left - p) / 2 + 'px) scale(0.5) translateX(-100%) translateY(100%)'
           when 6
             copy.style.transform = shift + 'translateY('+ (-rect.bottom - rect.top + p)/ 2 + 'px) ' +
-            'scale(0.5) translateY(100%)'
+            'translateX('+ (rect.right + rect.left - p) / 2 + 'px) scale(0.5) translateX(-100%) translateY(100%)'
           when 7
+            copy.style.transform = shift + 'translateY('+ (-rect.bottom - rect.top + p)/ 2 + 'px) ' +
+            'scale(0.5) translateY(100%)'
+          when 8
             copy.style.transform = shift + 'translateY('+ (-rect.bottom - rect.top + p)/ 2 + 'px) ' +
             'translateX('+ (- rect.left - rect.right + p) / 2 + 'px) scale(0.5) translateX(100%) translateY(100%)'
 
@@ -186,8 +187,11 @@ Expose.getRectangle = (element) ->
         offsetWidth = child.offsetWidth
         offsetLeft = child.offsetLeft
     offsetTop = list[0].offsetTop
+    if list[0].tagName == 'PICTURE'
+      offsetTop += list[0].offsetHeight - 200
     offsetHeight = list[list.length - 1].offsetTop + list[list.length - 1].offsetHeight - offsetTop
-
+    if list[1].tagName == 'PICTURE'
+      offsetHeight -= list[1].offsetHeight - 200
   else
     offsetHeight = 0
     offsetTop = 0
@@ -219,6 +223,7 @@ shifts = [
   [0,-1]
   [1, -1]
   [-1,0]
+  [0,0]
   [1, 0]
   [-1,1]
   [0, 1]
