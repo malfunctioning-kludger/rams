@@ -1454,7 +1454,7 @@ global.Pallete = module.exports = function(img) {
       for (j = l = 0, len1 = row.length; l < len1; j = ++l) {
         cell = row[j];
         if (j < 7) {
-          if (name === cell) {
+          if (name === cell || (i === I && j === J)) {
             return Schemes[cell](swatches, matrix, (I != null ? I : i) / 6, (J != null ? J : j) / 6);
           }
         }
