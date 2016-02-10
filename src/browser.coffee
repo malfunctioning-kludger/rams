@@ -101,16 +101,16 @@ Perspective = (element, e, rect) ->
     element.appendChild(placeholder)
 
   ease = (t) ->
-    return t * t
+    return t * 1.15
   x = Math.min(element.offsetWidth, Math.max(0, e.pageX - element.offsetLeft))
   negateX = (x / element.offsetWidth - 0.5) < 0
-  X = Math.max(0, Math.min(1, ease Math.abs(x / element.offsetWidth - 0.5)))
+  X = Math.max(0, Math.min(0.5, ease Math.abs(x / element.offsetWidth - 0.5)))
   if negateX
     X = - X
 
   y = Math.min(element.offsetHeight, ease Math.max(0, e.pageY - element.offsetTop))
   negateY = (y / element.offsetHeight - 0.5) < 0
-  Y = Math.max(0, Math.min(1, ease Math.abs(y / element.offsetHeight - 0.5)))
+  Y = Math.max(0, Math.min(0.5, ease Math.abs(y / element.offsetHeight - 0.5)))
   if negateY
     Y = - Y
 
