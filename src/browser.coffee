@@ -100,23 +100,21 @@ Perspective = (element, e, rect) ->
     placeholder.style.height = totalHeight + 'px'
     element.appendChild(placeholder)
 
-  ease = (t) ->
-    return t * 1.15
   x = Math.min(element.offsetWidth, Math.max(0, e.pageX - element.offsetLeft))
   negateX = (x / element.offsetWidth - 0.5) < 0
-  X = Math.max(0, Math.min(0.5, ease Math.abs(x / element.offsetWidth - 0.5)))
+  X = Math.abs(x / element.offsetWidth - 0.5)
   if negateX
     X = - X
 
-  y = Math.min(element.offsetHeight, ease Math.max(0, e.pageY - element.offsetTop))
+  y = Math.min(element.offsetHeight, Math.max(0, e.pageY - element.offsetTop))
   negateY = (y / element.offsetHeight - 0.5) < 0
-  Y = Math.max(0, Math.min(0.5, ease Math.abs(y / element.offsetHeight - 0.5)))
+  Y = Math.abs(y / element.offsetHeight - 0.5)
   if negateY
     Y = - Y
 
 
-  x = '50%'
-  y = '50%'
+  x = 0
+  y = 0
   totalWidth = (rect.width) * 0.65 * 3
   totalHeight = (rect.height) * 0.65 * 3
   if (diffX = (totalWidth - element.offsetWidth)) > 0
@@ -181,7 +179,7 @@ Expose = (element, callback, e) ->
     copy.style.zIndex = 3 + (8 - order[i])
     if i == 4
       copy.style.opacity = 0
-    copy.style.transition = 'clip 0.7s, opacity 0.35s ' + parseFloat((0.1 * Math.floor(Math.random() * 3)).toFixed(3)) + 's, transform 0.35s  '
+    copy.style.transition = 'clip 0.15s, opacity 0.35s ' + parseFloat((0.1 * Math.floor(Math.random() * 3)).toFixed(3)) + 's, transform 0.35s  '
     copies[i] = copy
     scale = 0.65
     p = 4
@@ -230,7 +228,6 @@ Expose = (element, callback, e) ->
   document.addEventListener('mousemove', listener)
   parent.classList.add('copies')
   parent.style.overflow = 'hidden'
-  parent.style.perspective = '1px'
   parent.style.position = 'absolute'
   parent.style.left = element.offsetLeft + 'px'
   parent.style.top = element.offsetTop + 'px'
