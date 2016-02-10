@@ -139,7 +139,7 @@ window.addEventListener('load', module.exports);
 
 
 },{}],2:[function(require,module,exports){
-var Expose, Unexpose, article, copies, exposed, getChildren, i, j, layout, order, palletes, shifts;
+var Article, Expose, Perspective, Unexpose, article, copies, exposed, getChildren, i, j, layout, listener, order, palletes, shift, shifts;
 
 palletes = {};
 
@@ -202,7 +202,7 @@ module.exports.example = function(path, index) {
     }
   };
   article = document.createElement('article');
-  article.className = "padded horizontal x-aligned";
+  article.className = "padded horizontal x-aligned has-connector";
   article.classList.add(['inverted', 'uninverted', 'uninverted', 'inverted', 'inverted', 'uninverted'][index % 6]);
   article.innerHTML = "<div class=\"box padded vertical textual \">\n  <h1>Hello world</h1>\n  <p>This is a wonderful day to do the great art. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n\n  <div class=\"block padded vertical textual\">\n    <h1>This is a nested <span class=\"accent\">group</span></h1>\n    <p>This is a wonderful day to do the great art</p>\n  </div>\n</div>\n<picture class=\"graphical decorated\">\n  <img src=\"" + path + "\" />\n</picture>";
   return article;
@@ -216,57 +216,113 @@ Unexpose = function(element, callback) {
   var copied, copy, j, len, xposed;
   document.body.classList.remove('exposing');
   exposed.style.transform = '';
+  exposed.style.opacity = '';
+  exposed.classList.remove('exposed');
+  document.removeEventListener('mousemove', listener);
   copied = copies.slice();
   for (j = 0, len = copied.length; j < len; j++) {
     copy = copied[j];
     if (!copy) {
       continue;
     }
-    if (copy === element) {
-      copy.style.transform = 'scale(1)';
-      copy.style.zIndex = '1';
-      copy.style.opacity = 0;
-      copy.style.clip = 'rect(' + 0 + 'px,' + copy.offsetWidth + 'px,' + copy.offsetHeight + 'px,' + 0 + 'px)';
-    } else {
-      copy.style.transform = 'scale(0.5)';
-      copy.style.zIndex = '';
-      copy.style.opacity = 0;
-    }
+    copy.parentNode.classList.remove('open');
   }
   xposed = exposed;
   if (typeof callback === "function") {
-    callback(xposed);
+    callback(xposed, element);
   }
   setTimeout(function() {
-    var k, len1, ref, results;
-    xposed.style.zIndex = '';
-    results = [];
-    for (k = 0, len1 = copied.length; k < len1; k++) {
-      copy = copied[k];
-      results.push(copy != null ? (ref = copy.parentNode) != null ? ref.removeChild(copy) : void 0 : void 0);
-    }
-    return results;
-  }, 800);
+    copy.parentNode.parentNode.removeChild(copy.parentNode);
+    return xposed.style.zIndex = '';
+  }, 600);
   return copies = exposed = null;
 };
 
-order = [2, 1, 0, 2, 1, 0, 2, 1, 0];
+Perspective = function(element, e, rect) {
+  var X, Y, diffX, diffY, ease, negateX, negateY, placeholder, totalHeight, totalWidth, x, y;
+  if (!(placeholder = element.querySelectorAll('span.placeholder'))) {
+    placeholder = document.createElement('span');
+    placeholder.className = 'placeholder';
+    placeholder.style.position = 'absolute';
+    placeholder.style.top = '0';
+    placeholder.style.left = '0';
+    totalWidth = rect.width * 0.65 * 3;
+    totalHeight = rect.height * 0.65 * 3;
+    placeholder.style.width = totalWidth + 'px';
+    placeholder.style.height = totalHeight + 'px';
+    element.appendChild(placeholder);
+  }
+  ease = function(t) {
+    return t * t;
+  };
+  x = Math.min(element.offsetWidth, Math.max(0, e.pageX - element.offsetLeft));
+  negateX = (x / element.offsetWidth - 0.5) < 0;
+  X = Math.max(0, Math.min(1, ease(Math.abs(x / element.offsetWidth - 0.5))));
+  if (negateX) {
+    X = -X;
+  }
+  y = Math.min(element.offsetHeight, ease(Math.max(0, e.pageY - element.offsetTop)));
+  negateY = (y / element.offsetHeight - 0.5) < 0;
+  Y = Math.max(0, Math.min(1, ease(Math.abs(y / element.offsetHeight - 0.5))));
+  if (negateY) {
+    Y = -Y;
+  }
+  x = '50%';
+  y = '50%';
+  totalWidth = rect.width * 0.65 * 3;
+  totalHeight = rect.height * 0.65 * 3;
+  if ((diffX = totalWidth - element.offsetWidth) > 0) {
+    x = X * -diffX;
+  }
+  if ((diffY = totalHeight - element.offsetHeight) > 0) {
+    y = Y * -diffY;
+  }
+  console.error([X, Y], [x, y], diffY, diffX, 666);
+  element.scrollLeft = totalWidth / 2 - x;
+  return element.scrollTop = totalHeight / 2 - y;
+};
 
-Expose = function(element, callback) {
-  var copy, i, j, k, len, parent, rect, shift, totalLeft;
+order = [0, 0, 0, 1, 1, 1, 2, 2, 2];
+
+listener = null;
+
+shift = '';
+
+Expose = function(element, callback, e) {
+  var cY, centerY, chosen, copy, i, j, k, len, mid, p, parent, rect, ref, scale, totalHeight, totalWidth;
   if (copies) {
     Unexpose();
   }
-  document.body.classList.add('exposing');
+  element.classList.add('exposed');
   exposed = element;
   copies = [];
   if (rect = Expose.getRectangle(element)) {
-    console.log(rect, rect.toString());
-    element.style.clip = rect.toString();
+    element.style.transform = 'scale(0.65)';
+    element.style.opacity = '0';
   }
+  totalWidth = rect.width * 3;
+  totalHeight = rect.height * 3;
+  centerY = element.offsetHeight / 2;
+  cY = rect.top + rect.height / 2;
+  shift = 'translateY(' + (centerY - cY) + 'px)' + 'translateX(' + totalWidth / 2 + 'px) translateY(' + totalHeight / 2 + 'px)';
+  element.style.clip = rect.toString();
   for (i = j = 0; j < 9; i = ++j) {
     copy = element.cloneNode(true);
-    copy.setAttribute('id', 'copy' + element.id + '-' + i);
+    if ((ref = copy.getElementsByTagName('h1')[0]) != null) {
+      ref.innerHTML;
+    }
+    if (i === 4) {
+      copy.style.clip = rect.toString(20);
+      mid = copy;
+    } else {
+      copy.onmouseover = function() {
+        return this.style.clip = rect.toString(20);
+      };
+      copy.onmouseout = function() {
+        return this.style.clip = rect.toString(0);
+      };
+    }
+    copy.setAttribute('id', 'copy-' + element.id + '-' + i);
     if ((typeof callback === "function" ? callback(copy, i) : void 0) === false) {
       continue;
     }
@@ -274,32 +330,82 @@ Expose = function(element, callback) {
     copy.style.position = 'absolute';
     copy.style.width = element.offsetWidth + 'px';
     copy.style.height = element.offsetHeight + 'px';
-    copy.style.top = element.offsetTop + 'px';
-    copy.style.left = element.offsetLeft + 'px';
+    copy.style.top = 0 + 'px';
+    copy.style.left = 0 + 'px';
     copy.style.zIndex = 3 + (8 - order[i]);
-    copy.style.opacity = 0;
-    copy.style.transform = 'scale(0.75)';
-    copy.style.transition = 'clip 0.3s, opacity 0.4s ' + parseFloat((0.05 * order[i]).toFixed(3)) + 's, transform 0.3s ease-in ' + parseFloat((0.04 * order[i]).toFixed(3)) + 's';
-    copies[i] = copy;
-    console.log(i, order[i]);
-  }
-  totalLeft = 0;
-  while (parent || (parent = element)) {
-    totalLeft += parent.offsetLeft || 0;
-    if (!(parent = parent.offsetParent)) {
-      break;
+    if (i === 4) {
+      copy.style.opacity = 0;
     }
+    copy.style.transition = 'clip 0.7s, opacity 0.35s ' + parseFloat((0.1 * Math.floor(Math.random() * 3)).toFixed(3)) + 's, transform 0.35s  ';
+    copies[i] = copy;
+    scale = 0.65;
+    p = 4;
+    switch (i) {
+      case 0:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateY(' + (rect.bottom + rect.top - p) + 'px) translateX(' + (rect.right + rect.left - p) + 'px) ' + 'translateX(-120%) translateY(-120%)';
+        break;
+      case 1:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateY(' + (rect.bottom + rect.top - p) + 'px)  translateY(-120%)';
+        break;
+      case 2:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateY(' + (rect.bottom + rect.top - p) + 'px) translateX(' + (-rect.left - rect.right + p) + 'px) ' + 'translateX(120%) translateY(-120%)';
+        break;
+      case 3:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateX(' + (rect.right + rect.left - p) + 'px) ' + 'translateX(-120%)';
+        break;
+      case 4:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateX(0px) ';
+        break;
+      case 5:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateX(' + (-rect.left - rect.right + p) + 'px) ' + 'translateX(120%)';
+        break;
+      case 6:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateY(' + (-rect.bottom - rect.top + p) + 'px) ' + 'translateX(' + (rect.right + rect.left - p) + 'px) translateX(-120%) translateY(120%)';
+        break;
+      case 7:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateY(' + (-rect.bottom - rect.top + p) + 'px) ' + 'translateY(120%)';
+        break;
+      case 8:
+        copy.style.transform = 'scale(' + scale + ') ' + shift + 'translateY(' + (-rect.bottom - rect.top + p) + 'px) ' + 'translateX(' + (-rect.left - rect.right + p) + 'px) translateX(120%) translateY(120%)';
+    }
+    copy.setAttribute('original-transform', copy.style.transform);
   }
-  shift = 'translateX(' + (window.innerWidth / 2 - totalLeft - element.offsetWidth / 2) + 'px) ';
+  parent = document.createElement('div');
+  chosen = null;
+  listener = function(e) {
+    var hover;
+    Perspective(parent, e, rect);
+    if ((hover = Article(e.target))) {
+      if (chosen && hover !== chosen) {
+        chosen.classList.remove('selected');
+      }
+      chosen = hover;
+      return chosen.classList.add('selected');
+    }
+  };
+  document.addEventListener('mousemove', listener);
+  parent.classList.add('copies');
+  parent.style.overflow = 'hidden';
+  parent.style.perspective = '1px';
+  parent.style.position = 'absolute';
+  parent.style.left = element.offsetLeft + 'px';
+  parent.style.top = element.offsetTop + 'px';
+  parent.style.width = element.offsetWidth + 'px';
+  parent.style.height = element.offsetHeight + 'px';
+  parent.style.overflow = 'hidden';
   for (k = 0, len = copies.length; k < len; k++) {
     copy = copies[k];
     if (copy) {
-      element.parentNode.insertBefore(copy, element.nextSibling);
+      parent.appendChild(copy);
     }
   }
+  element.parentNode.insertBefore(parent, element.nextSibling);
   return requestAnimationFrame(function() {
+    document.body.classList.add('exposing');
+    parent.classList.add('open');
+    Perspective(parent, e, rect);
     return requestAnimationFrame(function() {
-      var l, len1, p, results;
+      var l, len1, midScale, resize, results;
       results = [];
       for (i = l = 0, len1 = copies.length; l < len1; i = ++l) {
         copy = copies[i];
@@ -307,35 +413,37 @@ Expose = function(element, callback) {
           continue;
         }
         copy.style.opacity = 1;
-        copy.style.transform = 'scale(0.5)';
         p = 3;
+        scale = 0.65;
+        resize = 'scale(0.65)';
+        midScale = 1 - 22 / rect.width;
         switch (i) {
           case 0:
-            results.push(copy.style.transform = shift + 'translateY(' + (rect.bottom + rect.top - p) / 2 + 'px) translateX(' + (rect.right + rect.left - p) / 2 + 'px) ' + 'scale(0.5) translateX(-100%) translateY(-100%)');
+            results.push(copy.style.transform = resize + shift + 'translateY(' + (rect.bottom + rect.top - p) + 'px) translateX(' + (rect.right + rect.left - p) + 'px) ' + 'translateX(-100%) translateY(-100%)');
             break;
           case 1:
-            results.push(copy.style.transform = shift + 'translateY(' + (rect.bottom + rect.top - p) / 2 + 'px)  scale(0.5) translateY(-100%)');
+            results.push(copy.style.transform = resize + shift + 'translateY(' + (rect.bottom + rect.top - p) + 'px) translateY(-100%)');
             break;
           case 2:
-            results.push(copy.style.transform = shift + 'translateY(' + (rect.bottom + rect.top - p) / 2 + 'px) translateX(' + (-rect.left - rect.right + p) / 2 + 'px) ' + 'scale(0.5) translateX(100%) translateY(-100%)');
+            results.push(copy.style.transform = resize + shift + 'translateY(' + (rect.bottom + rect.top - p) + 'px) translateX(' + (-rect.left - rect.right + p) + 'px) ' + 'translateX(100%) translateY(-100%)');
             break;
           case 3:
-            results.push(copy.style.transform = shift + 'translateX(' + (rect.right + rect.left - p) / 2 + 'px) ' + 'scale(0.5) translateX(-100%)');
+            results.push(copy.style.transform = resize + shift + 'translateX(' + (rect.right + rect.left - p) + 'px) ' + 'translateX(-100%)');
             break;
           case 4:
-            results.push(copy.style.transform = shift + 'translateX(0px) ' + 'scale(0.5)');
+            results.push(copy.style.transform = resize + shift);
             break;
           case 5:
-            results.push(copy.style.transform = shift + 'translateX(' + (-rect.left - rect.right + p) / 2 + 'px) ' + 'scale(0.5) translateX(100%)');
+            results.push(copy.style.transform = resize + shift + 'translateX(' + (-rect.left - rect.right + p) + 'px) ' + 'translateX(100%)');
             break;
           case 6:
-            results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'translateX(' + (rect.right + rect.left - p) / 2 + 'px) scale(0.5) translateX(-100%) translateY(100%)');
+            results.push(copy.style.transform = resize + shift + 'translateY(' + (-rect.bottom - rect.top + p) + 'px) ' + 'translateX(' + (rect.right + rect.left - p) + 'px) translateX(-100%) translateY(100%)');
             break;
           case 7:
-            results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'scale(0.5) translateY(100%)');
+            results.push(copy.style.transform = resize + shift + 'translateY(' + (-rect.bottom - rect.top + p) + 'px) ' + 'translateY(100%)');
             break;
           case 8:
-            results.push(copy.style.transform = shift + 'translateY(' + (-rect.bottom - rect.top + p) / 2 + 'px) ' + 'translateX(' + (-rect.left - rect.right + p) / 2 + 'px) scale(0.5) translateX(100%) translateY(100%)');
+            results.push(copy.style.transform = resize + shift + 'translateY(' + (-rect.bottom - rect.top + p) + 'px) ' + 'translateX(' + (-rect.left - rect.right + p) + 'px) translateX(100%) translateY(100%)');
             break;
           default:
             results.push(void 0);
@@ -359,8 +467,9 @@ getChildren = function(element) {
 };
 
 Expose.getRectangle = function(element) {
-  var child, j, k, len, len1, list, offsetHeight, offsetLeft, offsetTop, offsetWidth;
+  var child, imageHeight, j, k, len, len1, list, offsetHeight, offsetLeft, offsetTop, offsetWidth, space;
   list = getChildren(element);
+  imageHeight = 150;
   if (element.classList.contains('vertical') || element.classList.contains('actually-vertical')) {
     offsetWidth = 0;
     offsetLeft = 0;
@@ -372,12 +481,15 @@ Expose.getRectangle = function(element) {
       }
     }
     offsetTop = list[0].offsetTop;
-    if (list[0].tagName === 'PICTURE') {
-      offsetTop += list[0].offsetHeight - 200;
-    }
     offsetHeight = list[list.length - 1].offsetTop + list[list.length - 1].offsetHeight - offsetTop;
+    if (list[0].tagName === 'PICTURE') {
+      space = element.offsetHeight - offsetHeight + list[0].offsetHeight;
+      offsetTop += list[0].offsetHeight - space / 3;
+      offsetHeight = list[list.length - 1].offsetTop + list[list.length - 1].offsetHeight - offsetTop;
+    }
     if (list[1].tagName === 'PICTURE') {
-      offsetHeight -= list[1].offsetHeight - 200;
+      space = element.offsetHeight - offsetHeight + list[1].offsetHeight;
+      offsetHeight -= list[1].offsetHeight - space / 3;
     }
   } else {
     offsetHeight = 0;
@@ -399,13 +511,25 @@ Expose.getRectangle = function(element) {
     bottom: element.offsetHeight - offsetHeight - offsetTop,
     height: offsetHeight,
     width: offsetWidth,
-    toString: function() {
-      return 'rect(' + this.top + 'px,' + (this.left + this.width) + 'px,' + (this.top + this.height) + 'px,' + this.left + 'px)';
+    toString: function(offset) {
+      if (offset == null) {
+        offset = 0;
+      }
+      return 'rect(' + (this.top + offset) + 'px,' + (this.left + this.width - offset) + 'px,' + (this.top + this.height - offset) + 'px,' + (this.left + offset) + 'px)';
     }
   };
 };
 
 shifts = [[-1, -1], [0, -1], [1, -1], [-1, 0], [0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+
+Article = function(parent) {
+  while ((parent != null ? parent.nodeType : void 0) === 1) {
+    if (parent.tagName === 'ARTICLE') {
+      return parent;
+    }
+    parent = parent.parentNode;
+  }
+};
 
 document.addEventListener('click', function(e) {
   var parent, results;
@@ -415,6 +539,9 @@ document.addEventListener('click', function(e) {
     if (parent.tagName === 'ARTICLE') {
       e.preventDefault();
       if (parent.classList.contains('copy')) {
+        if (exposed) {
+          parent;
+        }
         Unexpose(parent, function(element) {
           element.setAttribute('color-x', parent.getAttribute('color-x'));
           element.setAttribute('color-y', parent.getAttribute('color-y'));
@@ -434,7 +561,7 @@ document.addEventListener('click', function(e) {
             e = error;
             return false;
           }
-        });
+        }, e);
       }
       break;
     }

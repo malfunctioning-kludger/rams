@@ -99,6 +99,9 @@ article.actually-vertical, article.vertical {
   .box.top {
     align-self: top; }
 
+body {
+  counter-reset: picture; }
+
 article:not(.copy) picture {
   counter-increment: picture; }
 
@@ -108,7 +111,10 @@ article picture {
 body {
   counter-reset: picture; }
 
-picture.decorated:after {
+.has-connector picture {
+  position: relative; }
+
+.has-connector picture:after {
   content: counter(picture, upper-roman);
   position: absolute;
   top: 1.75rem;
@@ -116,11 +122,11 @@ picture.decorated:after {
   font-size: 2rem;
   width: 4rem; }
 
-picture.decorated:before {
+.has-connector picture:before {
   content: "";
   position: absolute; }
 
-.horizontal > picture.decorated:before {
+.has-connector.horizontal > picture:before {
   top: 1rem;
   left: 0;
   border-top: 2rem solid transparent;
@@ -128,7 +134,7 @@ picture.decorated:before {
   border-left: 2rem solid currentColor;
   border-right: 0; }
 
-.horizontal.inverted > picture.decorated:before {
+.has-connector.horizontal.inverted > picture:before {
   border-top: 2rem solid transparent;
   border-bottom: 2rem solid transparent;
   border-right: 2rem solid currentColor;
@@ -136,17 +142,17 @@ picture.decorated:before {
   top: 1rem;
   right: 0; }
 
-.horizontal.inverted > picture.decorated:after {
+.has-connector.horizontal.inverted > picture:after {
   left: auto;
   right: -5rem; }
 
-.vertical.inverted > picture.decorated:after, .actually-vertical.inverted > picture.decorated:after {
+.has-connector.vertical.inverted > picture:after, .has-connector.actually-vertical.inverted > picture:after {
   bottom: -2rem;
   top: auto;
   left: 1rem;
   text-align: center; }
 
-.vertical.inverted > picture.decorated:before, .actually-vertical.inverted > picture.decorated:before {
+.has-connector.vertical.inverted > picture:before, .has-connector.actually-vertical.inverted > picture:before {
   border-left: 2rem solid transparent;
   border-right: 2rem solid transparent;
   border-bottom: 2rem solid currentColor;
@@ -156,12 +162,12 @@ picture.decorated:before {
   left: 1rem;
   right: auto; }
 
-.vertical > picture.decorated:after, .actually-vertical > picture.decorated:after {
+.has-connector.vertical > picture:after, .has-connector.actually-vertical > picture:after {
   top: -2rem;
   left: 1rem;
   text-align: center; }
 
-.vertical > picture.decorated:before, .actually-vertical > picture.decorated:before {
+.has-connector.vertical > picture:before, .has-connector.actually-vertical > picture:before {
   border-left: 2rem solid transparent;
   border-right: 2rem solid transparent;
   border-top: 2rem solid currentColor;
@@ -173,30 +179,43 @@ picture.decorated:before {
 
 body, html {
   padding: 0;
-  margin: 0; }
+  margin: 0;
+  z-index: 2;
+  overflow-x: hidden;
+  overflow-y: visible;
+  width: 100%;
+  background: #549ae6; }
+
+.copies {
+  outline: 10px solid #549ae6;
+  outline-offset: 0;
+  opacity: 0.5; }
+
+.copies.open {
+  opacity: 1;
+  z-index: 2; }
 
 article {
   position: relative;
-  transition: transform 0.3s, color 0.3s, background-color 0.3s; }
+  z-index: 1; }
+  article.copy {
+    z-index: 0; }
+    article.copy picture {
+      opacity: 0.4; }
+    article.copy:after {
+      content: "";
+      position: absolute;
+      top: 0;
+      background-image: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+      height: 100px; }
+    article.copy.inverted:after {
+      content: "";
+      bottom: 0;
+      background-image: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+      height: 100px; }
 
 * {
-  transition: color 0.3s ease-in, background-color 0.5s ease-out; }
-
-body:before {
-  pointer-events: none;
-  position: fixed;
-  z-index: 1;
-  content: "";
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  transition: opacity 1s;
-  background: rgba(0, 0, 0, 0.8);
-  opacity: 0; }
-
-body.exposing:before {
-  opacity: 1; }
+  transition: opacity 0.3s, transform 0.4s, color 0.3s ease-in, outline-color 0.3s, outline-offset 0.3s, background-color 0.5s ease-out; }
 
 h1, h2, h3, p, ul, li, .block {
   padding: 0;

@@ -1,3 +1,6 @@
+body
+  counter-reset: picture
+
 article:not(.copy) picture
   counter-increment: picture
 
@@ -7,70 +10,5 @@ article picture
 body
   counter-reset: picture
 
-picture.decorated:after
-  content: counter(picture, upper-roman)
-  position: absolute
-  top: 1.75rem
-  left: -2rem
-  font-size: 2rem
-  width: 4rem
-
-picture.decorated:before
-  content: ""
-  position: absolute
-
-.horizontal > picture.decorated:before
-  top: 1rem
-  left: 0
-
-  border-top: 2rem solid transparent
-  border-bottom: 2rem solid transparent
-  border-left: 2rem solid currentColor
-  border-right: 0
-
-.horizontal.inverted > picture.decorated:before
-  border-top: 2rem solid transparent
-  border-bottom: 2rem solid transparent
-  border-right: 2rem solid currentColor
-  border-left: 0
-  top: 1rem
-  right: 0
-
-
-.horizontal.inverted > picture.decorated:after
-  left: auto
-  right: -5rem
-
-.vertical.inverted, .actually-vertical.inverted
-  > picture.decorated:after
-    bottom: -2rem
-    top: auto
-    left: 1rem
-    text-align: center
-
-  > picture.decorated:before
-    border-left: 2rem solid transparent
-    border-right: 2rem solid transparent
-    border-bottom: 2rem solid currentColor
-    border-top: 0
-    bottom: 0
-    top: auto
-    left: 1rem
-    right: auto
-
-
-.vertical, .actually-vertical
-  > picture.decorated:after
-    top: -2rem
-    left: 1rem
-    text-align: center
-
-  > picture.decorated:before
-    border-left: 2rem solid transparent
-    border-right: 2rem solid transparent
-    border-top: 2rem solid currentColor
-    border-bottom: 0
-    top: 0
-    bottom: auto
-    left: 1rem
-    right: auto
+.has-connector
+  @import "decorations/connector"
